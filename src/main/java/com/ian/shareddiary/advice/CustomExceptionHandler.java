@@ -2,6 +2,7 @@ package com.ian.shareddiary.advice;
 
 import com.ian.shareddiary.member.exception.EmailLoginFailedException;
 import com.ian.shareddiary.member.exception.EmailSignupFailedException;
+import com.ian.shareddiary.member.exception.MemberNotFoundException;
 import com.ian.shareddiary.model.response.CommonResult;
 import com.ian.shareddiary.service.response.ResponseService;
 import javax.servlet.http.HttpServletRequest;
@@ -39,10 +40,10 @@ public class CustomExceptionHandler {
 	 * -1000
 	 * 유저를 찾지 못했을 때 발생시키는 예외
 	 */
-	@ExceptionHandler(UserNotFoundException.class)
+	@ExceptionHandler(MemberNotFoundException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	protected CommonResult userNotFoundException(HttpServletRequest request,
-		UserNotFoundException e) {
+		MemberNotFoundException e) {
 		return responseService.getFailResult(
 			Integer.parseInt(getMessage("userNotFound.code")), getMessage("userNotFound.msg")
 		);
@@ -79,7 +80,7 @@ public class CustomExceptionHandler {
 	/**
 	 * -1003 전달한 Jwt 이 정상적이지 않은 경우 발생 시키는 예외
 	 */
-	@ExceptionHandler(AuthenticationEntryPointException.class)
+	/*@ExceptionHandler(AuthenticationEntryPointException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	protected CommonResult authenticationEntrypointException(HttpServletRequest request,
 		AuthenticationEntryPointException e) {
@@ -89,9 +90,9 @@ public class CustomExceptionHandler {
 		);
 	}
 
-	/**
+	*//**
 	 * -1004 권한이 없는 리소스를 요청한 경우 발생 시키는 예외
-	 */
+	 *//*
 	@ExceptionHandler(AccessDeniedException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	protected CommonResult accessDeniedException(HttpServletRequest request,
@@ -101,9 +102,9 @@ public class CustomExceptionHandler {
 		);
 	}
 
-	/**
+	*//**
 	 * -1005 refresh token 에러시 발생 시키는 에러
-	 */
+	 *//*
 	@ExceptionHandler(RefreshTokenException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	protected CommonResult refreshTokenException(HttpServletRequest request,
@@ -114,9 +115,11 @@ public class CustomExceptionHandler {
 		);
 	}
 
+	*/
+
 	/**
 	 * -1006 액세스 토큰 만료시 발생하는 에러
-	 */
+	 *//*
 	@ExceptionHandler(ExpiredAccessTokenException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	protected CommonResult expiredAccessTokenException(HttpServletRequest request,
@@ -125,8 +128,7 @@ public class CustomExceptionHandler {
 			Integer.parseInt(getMessage("expiredAccessToken.code")),
 			getMessage("expiredAccessToken.msg")
 		);
-	}
-
+	}*/
 	private String getMessage(String code) {
 		return getMessage(code, null);
 	}

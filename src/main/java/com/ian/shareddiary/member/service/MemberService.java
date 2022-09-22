@@ -1,47 +1,88 @@
 package com.ian.shareddiary.member.service;
 
+import com.ian.shareddiary.config.security.JwtProvider;
 import com.ian.shareddiary.member.domain.Member;
-import com.ian.shareddiary.member.dto.MemberDto;
+import com.ian.shareddiary.member.dto.MemberRequestDto.SignInDto;
+import com.ian.shareddiary.member.dto.MemberRequestDto.SignUpDto;
+import com.ian.shareddiary.member.dto.MemberResponseDto;
+import com.ian.shareddiary.member.exception.EmailLoginFailedException;
+import com.ian.shareddiary.member.exception.MemberNotFoundException;
 import com.ian.shareddiary.member.repository.MemberRepository;
-import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
-public class MemberService implements UserDetailsService {
+public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JwtProvider jwtProvider;
 
-	public Member createMember(MemberDto.RequestMemberDto request) {
+	@Transactional
+	public Long createMember(SignUpDto request) {
 		request.encryptPassword(passwordEncoder.encode(request.getPassword()));
 
 		Member member = request.toEntity();
 		memberRepository.save(member);
 		log.info("Created member : " + member.getEmail());
 
-		return member;
+		return member.getId();
 	}
 
-	public void modifyMember(Member member) {
+	@Transactional
+	public String login(SignInDto request) {
+		Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(
+			EmailLoginFailedException::new);
 
+		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+			throw new EmailLoginFailedException();
+		}
+		return jwtProvider.createToken(member.getId(), member.getRoles());
 	}
 
-	public void deleteMember(Member member) {
-
+	@Transactional
+	public Long modifyMember(Long id, SignUpDto request) {
+		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
+		member.setEmail(request.getEmail());
+		member.setPassword(passwordEncoder.encode(request.getPassword()));
+		member.setName(request.getName());
+		member.setNickname(request.getNickname());
+		member.setPhoneNumber(request.getPhoneNumber());
+		log.info("Modified member : " + member.getEmail());
+		return member.getId();
 	}
 
-	@Override
-	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-		return memberRepository.findById(Long.parseLong(id))
-			.orElseThrow(() -> new UsernameNotFoundException("User " + id + " Not Found!"));
+	@Transactional
+	public void deleteMember(Long id) {
+		memberRepository.deleteById(id);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberResponseDto findById(Long id) {
+		Member member = memberRepository.findById(id)
+			.orElseThrow(MemberNotFoundException::new);
+		return new MemberResponseDto(member);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberResponseDto findByEmail(String email) {
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(MemberNotFoundException::new);
+		return new MemberResponseDto(member);
+	}
+
+	@Transactional(readOnly = true)
+	public List<MemberResponseDto> findAllMember() {
+		return memberRepository.findAll()
+			.stream()
+			.map(MemberResponseDto::new)
+			.collect(Collectors.toList());
 	}
 }

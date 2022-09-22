@@ -13,7 +13,7 @@ public class SwaggerConfiguration {
 	public GroupedOpenApi publicApi() {
 		return GroupedOpenApi.builder()
 			.group("ian")
-			.pathsToMatch("/api/**")
+			.pathsToMatch("/**")
 			.build();
 	}
 

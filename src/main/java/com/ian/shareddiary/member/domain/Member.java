@@ -1,5 +1,6 @@
 package com.ian.shareddiary.member.domain;
 
+import com.ian.shareddiary.domain.BaseTimeEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,11 +14,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -74,4 +77,5 @@ public class Member extends BaseTimeEntity implements UserDetails {
 	public boolean isEnabled() {
 		return false;
 	}
+
 }

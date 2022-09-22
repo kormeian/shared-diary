@@ -1,4 +1,4 @@
-package com.ian.shareddiary.member.domain;
+package com.ian.shareddiary.domain;
 
 import java.time.LocalDateTime;
 import javax.persistence.EntityListeners;

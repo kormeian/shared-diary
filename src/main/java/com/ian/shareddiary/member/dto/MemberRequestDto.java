@@ -9,15 +9,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class MemberDto {
+public class MemberRequestDto {
 
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@Getter
 	@Builder
 	@Setter
-	public static class RequestMemberDto {
+	public static class SignUpDto {
 
 		private Long id;
 
@@ -52,4 +53,20 @@ public class MemberDto {
 		}
 	}
 
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Builder
+	public static class SignInDto {
+
+		private String email;
+		private String password;
+
+		public Member toUser(PasswordEncoder passwordEncoder) {
+			return Member.builder()
+				.email(email)
+				.password(passwordEncoder.encode(password))
+				.build();
+		}
+	}
 }

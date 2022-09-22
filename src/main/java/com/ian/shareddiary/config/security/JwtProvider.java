@@ -1,6 +1,6 @@
 package com.ian.shareddiary.config.security;
 
-import com.ian.shareddiary.member.service.MemberService;
+import com.ian.shareddiary.member.service.security.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
 	private final Long tokenValidMillisecond = 60 * 60 * 1000L;
-	private final MemberService memberService;
+	private final CustomUserDetailsService customUserDetailsService;
 	@Value("spring.jwt.secret")
 	private String secretKey;
 
@@ -32,10 +32,10 @@ public class JwtProvider {
 	}
 
 	// Jwt 생성
-	public String createToken(String userPk, List<String> roles) {
+	public String createToken(Long id, List<String> roles) {
 
 		// user 구분을 위해 Claims에 User Pk값 넣어줌
-		Claims claims = Jwts.claims().setSubject(userPk);
+		Claims claims = Jwts.claims().setSubject(String.valueOf(id));
 		claims.put("roles", roles);
 		// 생성날짜, 만료날짜를 위한 Date
 		Date now = new Date();
@@ -51,7 +51,8 @@ public class JwtProvider {
 
 	// Jwt 로 인증정보를 조회
 	public Authentication getAuthentication(String token) {
-		UserDetails userDetails = memberService.loadUserByUsername(this.getUserPk(token));
+		UserDetails userDetails = customUserDetailsService.loadUserByUsername(
+			this.getUserPk(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "",
 			userDetails.getAuthorities());
 	}
