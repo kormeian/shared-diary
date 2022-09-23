@@ -6,6 +6,7 @@ import com.ian.shareddiary.member.dto.MemberRequestDto.SignInDto;
 import com.ian.shareddiary.member.dto.MemberRequestDto.SignUpDto;
 import com.ian.shareddiary.member.dto.MemberResponseDto;
 import com.ian.shareddiary.member.exception.EmailLoginFailedException;
+import com.ian.shareddiary.member.exception.MemberAlreadyExistsException;
 import com.ian.shareddiary.member.exception.MemberNotFoundException;
 import com.ian.shareddiary.member.repository.MemberRepository;
 import java.util.List;
@@ -27,6 +28,9 @@ public class MemberService {
 
 	@Transactional
 	public Long createMember(SignUpDto request) {
+		if (memberRepository.existsByEmail(request.getEmail())) {
+			throw new MemberAlreadyExistsException();
+		}
 		request.encryptPassword(passwordEncoder.encode(request.getPassword()));
 
 		Member member = request.toEntity();
@@ -44,13 +48,14 @@ public class MemberService {
 		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new EmailLoginFailedException();
 		}
+		log.info("Login Successful : " + member.getEmail());
 		return jwtProvider.createToken(member.getId(), member.getRoles());
 	}
 
 	@Transactional
-	public Long modifyMember(Long id, SignUpDto request) {
-		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
-		member.setEmail(request.getEmail());
+	public Long modifyMember(SignUpDto request) {
+		Member member = memberRepository.findByEmail(request.getEmail())
+			.orElseThrow(MemberNotFoundException::new);
 		member.setPassword(passwordEncoder.encode(request.getPassword()));
 		member.setName(request.getName());
 		member.setNickname(request.getNickname());

@@ -1,10 +1,11 @@
 package jacoco;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
 class JavaFooTest {
+
 	private JavaFoo javaFoo = new JavaFoo();
 
 	@Test
